@@ -61,19 +61,11 @@ jobs:
         - build: linux-arm64
           os: ubuntu-latest
           packages: gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross
-          openssl: true
           target: aarch64-unknown-linux-gnu
-          gcc: aarch64-linux-gnu-gcc
-          machine: aarch64
-          arch: aarch64
         - build: linux-arm-v7
           os: ubuntu-latest
           packages: gcc-arm-linux-gnueabihf libc6-dev-armel-cross
-          openssl: true
           target: armv7-unknown-linux-gnueabihf
-          gcc: arm-linux-gnueabihf-gcc
-          machine: arm
-          arch: arm
         - build: darwin-amd64
           os: macos-13
           target: x86_64-apple-darwin
@@ -89,7 +81,6 @@ jobs:
           path: |
             /usr/share/rust
             ~/.cargo
-            ~/openssl-1.1.1l
             target
           key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
@@ -98,19 +89,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ${{ matrix.packages }}
-
-      - name: Build OpenSSL
-        if: matrix.openssl
-        run: |
-          cd ~
-          wget https://www.openssl.org/source/openssl-1.1.1l.tar.gz
-          tar xzf openssl-1.1.1l.tar.gz
-          export MACHINE=${{ matrix.machine }}
-          export ARCH=${{ matrix.arch }}
-          export CC=${{ matrix.gcc }}
-          cd openssl-1.1.1l && ./config shared && make
-          echo OPENSSL_LIB_DIR=~/openssl-1.1.1l >>$GITHUB_ENV
-          echo OPENSSL_INCLUDE_DIR=~/openssl-1.1.1l/include >>$GITHUB_ENV
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable

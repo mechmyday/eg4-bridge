@@ -49,6 +49,6 @@ chrono = { version = "0.4.35", features = ["serde"] }
 enum_dispatch = "0.3.12"
 async-trait = "0.1.77"
 influxdb-line-protocol = "2.0.0"
-sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "any", "sqlite", "postgres", "mysql", "chrono", "migrate"] }
+sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "any", "sqlite", "postgres", "mysql", "chrono", "migrate"] }
 url = "2.5.0"
-reqwest = "0.13.2"
+reqwest = { version = "0.13.2", default-features = false, features = ["rustls-tls", "charset", "http2"] }

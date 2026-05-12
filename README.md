@@ -1,4 +1,5 @@
 # eg4-bridge
+[![Release](https://github.com/mechmyday/eg4-bridge/actions/workflows/release.yaml/badge.svg)](https://github.com/mechmyday/eg4-bridge/actions/workflows/release.yaml)
 
 eg4-bridge is a tool for monitoring and controlling EG4 inverters locally. It is based on the work originally done by @Chris Elsworth and @jaredmauch for LuxPower inverters.
 

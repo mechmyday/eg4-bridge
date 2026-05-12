@@ -1,4 +1,4 @@
-# Home Assistant addon: lxp-bridge
+# Home Assistant addon: eg4-bridge
 
 Allows local communication with Luxpower inverters and bridges to MQTT.
 
@@ -6,11 +6,11 @@ Allows local communication with Luxpower inverters and bridges to MQTT.
 
 ## About
 
-lxp-bridge is a tool to communicate with a LuxPower inverter (commonly used with home-battery and solar setups), written in Rust.
+eg4-bridge is a tool to communicate with a LuxPower inverter (commonly used with home-battery and solar setups), written in Rust.
 
 It allows you to monitor and control your inverter locally without any dependence on the manufacturer's own servers in China.
 
-Full documentation can be found in the [Wiki](https://github.com/celsworth/lxp-bridge/wiki).
+Full documentation can be found in the [Wiki](https://github.com/jaredmauch/eg4-bridge/wiki).
 
 
 [aarch64-shield]: https://img.shields.io/badge/aarch64-yes-green.svg

@@ -3,7 +3,7 @@ name = "eg4-bridge"
 version = "0.20.0-dev"
 authors = ["Chris Elsworth <chris@cae.me.uk>", "Jared Mauch <jared@puck.nether.net>"]
 edition = "2021"
-repository = "https://github.com/jaredmauch/eg4-bridge"
+repository = "https://github.com/mechmyday/eg4-bridge"
 
 [[bin]]
 name = "eg4-bridge"

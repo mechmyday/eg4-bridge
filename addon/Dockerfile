@@ -1,7 +1,7 @@
 ARG BUILD_VERSION
 ARG BUILD_FROM
 
-FROM jaredmauch/eg4-bridge:${BUILD_VERSION} AS lxp-bridge
+FROM mechmyday/eg4-bridge:${BUILD_VERSION} AS lxp-bridge
 
 FROM $BUILD_FROM
 COPY --from=lxp-bridge / /

@@ -1,8 +1,8 @@
-# https://hub.docker.com/repository/docker/celsworth/lxp-bridge
+# https://hub.docker.com/repository/docker/mechmyday/eg4-bridge
 #
 # Building/publishing:
-# docker build -t celsworth/lxp-bridge .
-# docker push celsworth/lxp-bridge:latest
+# docker build -t mechmyday/eg4-bridge .
+# docker push mechmyday/eg4-bridge:latest
 #
 
 FROM rust:latest as builder

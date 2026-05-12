@@ -6,7 +6,7 @@ arch:
 - armv7
 - aarch64
 - amd64
-url: "https://github.com/jaredmauch/eg4-bridge"
+url: "https://github.com/mechmyday/eg4-bridge"
 init: false
 startup: application
 stage: experimental

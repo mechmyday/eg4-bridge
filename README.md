@@ -1,6 +1,6 @@
 # eg4-bridge
 
-eg4-bridge is a tool for monitoring and controlling EG4 inverters locally. It is based on the work originally done by @Chris Elsworth for LuxPower inverters.
+eg4-bridge is a tool for monitoring and controlling EG4 inverters locally. It is based on the work originally done by @Chris Elsworth and @jaredmauch for LuxPower inverters.
 
 It allows you to monitor and possibly control your inverter locally.
 

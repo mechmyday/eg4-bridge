@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM rust:1.85 as builder
+FROM --platform=$BUILDPLATFORM rust:1.88 AS builder
 ARG TARGETPLATFORM
 WORKDIR /usr/src/eg4-bridge
 COPY Cargo.toml .

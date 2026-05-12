@@ -1,5 +1,5 @@
 name: eg4-bridge
-version: v0.13.0
+version: v0.13.1
 slug: eg4-bridge
 description: Allows local communication with Luxpower inverters and bridges it to MQTT
 arch:

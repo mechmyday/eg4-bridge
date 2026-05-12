@@ -19,6 +19,8 @@ homeassistant_enabled: false  # Optional: Enable Home Assistant integration
 read_only: false  # Optional: Defaults to false
 # Interval in seconds between reading input registers (default: 60)
 register_read_interval: 60  # Optional: Defaults to 60 seconds
+# Timeout in seconds between sending read requests to inverters (default: 300)
+inverter_timeout: 300  # Optional: Defaults to 300 seconds
 
 # List of inverters to connect to
 inverters:
@@ -88,7 +90,13 @@ mqtt:
   port: 1883
   username: mqtt
   password: mqtt
-  topic: eg4/#
+  namespace: lxp
+  # Whether to publish each input register as an individual MQTT message
+  # publish_individual_input: false  # Optional: Defaults to false
+  # Home Assistant MQTT discovery integration
+  homeassistant:
+    enabled: false           # Optional: Enable HA MQTT discovery
+    prefix: homeassistant    # Optional: Discovery prefix, default "homeassistant"
 
 # InfluxDB configuration
 influx:

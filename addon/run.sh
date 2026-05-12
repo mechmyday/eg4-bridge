@@ -8,4 +8,4 @@ bashio::log "Done."
 
 bashio::log.info "Starting eg4-bridge..."
 
-/usr/local/bin/lxp-bridge -c /etc/config.yaml
+/usr/local/bin/eg4-bridge -c /etc/config.yaml

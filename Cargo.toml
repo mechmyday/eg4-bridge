@@ -51,4 +51,4 @@ async-trait = "0.1.77"
 influxdb-line-protocol = "2.0.0"
 sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "any", "sqlite", "postgres", "mysql", "chrono", "migrate"] }
 url = "2.5.0"
-reqwest = { version = "0.13.2", default-features = false, features = ["rustls-tls", "charset", "http2"] }
+reqwest = { version = "0.13.2", default-features = false, features = ["rustls", "charset", "http2"] }

@@ -601,6 +601,30 @@ impl Coordinator {
                     error!("Failed to cache register {}: {}", td.register, e);
                 }
 
+                // Record per-datalog input registers and publish a register-keyed
+                // inputs/all snapshot. This is the canonical source for HA discovery,
+                // so it runs on every ReadInput regardless of whether the upstream
+                // ReadInputAll/N variant parsed successfully.
+                if td.device_function == DeviceFunction::ReadInput {
+                    if let Some(cache) = self.register_cache.as_ref() {
+                        let values_u16: Vec<u16> = td
+                            .values
+                            .chunks(2)
+                            .map(|chunk| {
+                                if chunk.len() == 2 {
+                                    Utils::u16ify(chunk, 0)
+                                } else {
+                                    chunk[0] as u16
+                                }
+                            })
+                            .collect();
+                        cache.record_input(td.datalog, td.register, &values_u16);
+                        if let Err(e) = self.publish_register_snapshot(td.datalog).await {
+                            error!("Failed to publish register snapshot: {}", e);
+                        }
+                    }
+                }
+
                 // Send to MQTT
                 if let Err(e) = self.send_to_mqtt(&td, parsed_input.as_ref()).await {
                     error!("Failed to send data to MQTT: {}", e);
@@ -950,6 +974,28 @@ impl Coordinator {
         for message in messages {
             self.channels.to_mqtt.send(mqtt::ChannelData::Message(message))?;
         }
+        Ok(())
+    }
+
+    async fn publish_register_snapshot(&self, datalog: Serial) -> Result<()> {
+        if !self.config.mqtt().enabled() {
+            return Ok(());
+        }
+        let cache = match self.register_cache.as_ref() {
+            Some(c) => c,
+            None => return Ok(()),
+        };
+        let snapshot = match cache.input_snapshot(&datalog) {
+            Some(s) => s,
+            None => return Ok(()),
+        };
+        let payload = serde_json::to_string(&snapshot)?;
+        let message = mqtt::Message {
+            topic: format!("{}/inputs/all", datalog),
+            retain: false,
+            payload,
+        };
+        self.channels.to_mqtt.send(mqtt::ChannelData::Message(message))?;
         Ok(())
     }
 

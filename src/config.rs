@@ -165,6 +165,9 @@ pub struct HomeAssistant {
 
     #[serde(default = "Config::default_mqtt_homeassistant_prefix")]
     pub prefix: String,
+
+    #[serde(default)]
+    pub publish_all_registers: bool,
 }
 
 impl HomeAssistant {
@@ -174,6 +177,10 @@ impl HomeAssistant {
 
     pub fn prefix(&self) -> &str {
         &self.prefix
+    }
+
+    pub fn publish_all_registers(&self) -> bool {
+        self.publish_all_registers
     }
 } // }}}
 
@@ -623,6 +630,7 @@ impl Config {
         HomeAssistant {
             enabled: Self::default_enabled(),
             prefix: Self::default_mqtt_homeassistant_prefix(),
+            publish_all_registers: false,
         }
     }
 

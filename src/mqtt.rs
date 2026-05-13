@@ -143,11 +143,10 @@ impl Message {
         }
 
         match parsed_input {
-            Some(ReadInput::ReadInputAll(r_all)) => r.push(mqtt::Message {
-                topic: format!("{}/inputs/all", td.datalog),
-                retain: false,
-                payload: serde_json::to_string(&r_all)?,
-            }),
+            // ReadInputAll → inputs/all is handled by the register-cache snapshot
+            // path in the coordinator (canonical shortname-keyed JSON). Skipping
+            // here avoids racing two writers to the same topic.
+            Some(ReadInput::ReadInputAll(_)) => {}
             Some(ReadInput::ReadInput1(r1)) => r.push(mqtt::Message {
                 topic: format!("{}/inputs/1", td.datalog),
                 retain: false,

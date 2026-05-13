@@ -45,6 +45,7 @@ options:
     homeassistant:
       enabled: false
       prefix: homeassistant
+      publish_all_registers: false
   influx:
     enabled: false
     url: "http://localhost:8086"
@@ -91,6 +92,7 @@ schema:
     homeassistant:
       enabled: bool
       prefix: str
+      publish_all_registers: bool?
     publish_individual_input: bool?
   influx:
     enabled: bool

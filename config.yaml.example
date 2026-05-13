@@ -95,8 +95,10 @@ mqtt:
   # publish_individual_input: false  # Optional: Defaults to false
   # Home Assistant MQTT discovery integration
   homeassistant:
-    enabled: false           # Optional: Enable HA MQTT discovery
-    prefix: homeassistant    # Optional: Discovery prefix, default "homeassistant"
+    enabled: false                 # Optional: Enable HA MQTT discovery
+    prefix: homeassistant          # Optional: Discovery prefix, default "homeassistant"
+    publish_all_registers: false   # Optional: Emit HA sensors for all 81 input registers
+                                   # (default: false, curated essentials only)
 
 # InfluxDB configuration
 influx:

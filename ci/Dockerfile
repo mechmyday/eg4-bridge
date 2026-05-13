@@ -6,6 +6,7 @@ COPY Cargo.lock .
 COPY .cargo .cargo
 COPY src src
 COPY db db
+COPY doc doc
 COPY ci ci
 RUN ./ci/docker-buildx-platform-setup.sh $TARGETPLATFORM
 RUN rustup target add $(cat /rust_target.txt)

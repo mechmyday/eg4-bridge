@@ -1,125 +1,61 @@
-# Unreleased
+# 0.13.2 - 2026-05-12
 
-* Reconnect to inverter after 15 minutes of not receiving any data (#223)
-* Fix max/min cell temperature/voltage decoding as reported from BMS (#227)
-* Add more HA entities: max/min cell temp/voltage, more charge powers (#228)
-* Add ReadInput4 with EG4 18k generator data (#239, @pmccut)
-* Add ReadInput4 keys to HA discovery (#240, @jgulick48)
-* Fix min_chg_curr/max_chg_curr decoding in ReadInputAll packet (#242, @presto8)
-
-
-# 0.13.0 - 27th October 2023
-
-* **BREAKING CHANGE**: Simplify scheduler.timesync configuration to appease HA (#209)
-* Attempt to fix unsigned maths overflow (#211)
-* Expose max_chg_curr and max_dischg_curr to HA (#212)
-
-
-# 0.12.0 - 29th September 2023
-
-* Add more sensors to HomeAssistant autodiscovery (#181, #194, @Sboshoff76)
-* Add `p_battery` and `p_grid` inputs keys to show net power flows (#183)
-* Avoid floating point maths oddities in e_pv_day and e_pv_all calculations (#185)
-* Add internal_fault/warning_code/fault_code keys (#189, #190, #191)
-* Revert to unsigned integers for inverter registers/values (#196)
-* Fix charge_priority_en value in hold/21/bits MQTT message (#201)
+* Fix Home Assistant sensors staying empty on inverters whose `ReadInput`
+  packets don't fit the upstream `ReadInputAll` byte layout (e.g. EG4 18kPV
+  sends data in 254-byte chunks at registers 0/127/254). The `inputs/all`
+  MQTT topic is now sourced from a per-datalog register cache and uses
+  register shortnames (`pv1_voltage`, `battery_voltage`, `soc`, etc.)
+  derived from `doc/eg4_registers.json`. Raw u16 values are published; HA's
+  `value_template` applies the per-register scale factor.
+* HA discovery is now metadata-driven. ~25 curated sensors by default; the
+  new `mqtt.homeassistant.publish_all_registers` option exposes all 81
+  documented input registers.
+* `ReadInputAll → inputs/all` MQTT publish removed (cache path is now the
+  single writer for that topic). InfluxDB and SQL pipelines unchanged.
+* Ship `doc/eg4_registers.json` into the build image so the new
+  `include_str!` resolves.
 
 
-# 0.11.0 - 16th July 2023
+# 0.13.1 - 2026-05-11
 
-* Fix crash due to signed integer overflow when saving inputs to InfluxDB (#161, @dgcartersa)
-* Add HomeAssistant add-on (#167, @apbarratt)
-* Add loglevel option to config.yaml (#168)
-* Add ac_first time register functionality (#171)
-
-
-# 0.10.0 - 20th April 2023
-
-* Fix crash in scheduler during DST transition times (#107)
-* Add read individual input command and optional publishing of individual input registers (#111)
-* [Internal Cleanup] Use signed integers for inverter registers/values (#115)
-* Add WriteParam functionality (`lxp/cmd/all/set/param/X`) (#117)
-* Decode bits in holding registers 21 and 110 and publish to `lxp/$datalog/hold/21/bits` (#119)
-* Better HomeAssistant discovery message structure (#120, @unreadablename)
-* Add MQTT messages to easily read/set time registers (#123)
-* Add missing `lxp/cmd/$datalog/set/forced_discharge` (#125)
-* Add more HA discovery sensors (#128, @unreadablename)
-* Add MQTT LWT and use it in HA discovery messages (#129, #130)
-* Add AC Charge/Charge Priority/Forced Discharge switches to HA discovery (#127)
-* Remove v_pv inputs key (#135)
-* Remove mqtt.homeassistant.sensors configuration option (#132, @lupine)
-* Add HA discovery messages for number controls (AC Charge Cutoff % etc) (#132, @lupine)
-* Fix crash in timesync during DST transition times (#153)
-* Add option to send holding registers on startup (#147, @lupine)
-* Add HomeAssistant time control discovery messages (#143, @lupine)
-* Retain holding and parameter register messages (#154, @lupine)
+* Close addon-vs-binary configuration gaps. The addon's generated
+  `/etc/config.yaml` now exposes every option the binary requires/honors:
+  the previously-missing `read_only`, `strict_data_check`,
+  `homeassistant_enabled`, `register_read_interval`, `inverter_timeout`,
+  `verbose`, `human_timestamps`, `show_unknown`; per-inverter
+  `use_tcp_nodelay`, `read_timeout`, `register_block_size`, `delay_ms`,
+  `read_only`, `register_read_interval`; the `mqtt.homeassistant`
+  sub-block; `mqtt.publish_individual_input`; and the `scheduler` block.
+* Sync `config.yaml.example` to the same set; fix the silently-ignored
+  `topic:` example key (the binary parses `namespace:`).
+* Port the HA addon base image from Alpine to Debian Bookworm to match the
+  bookworm runtime and resolve the `/bin` directory-vs-symlink COPY
+  conflict.
+* Add per-arch `build.yaml` files so the addon installer no longer warns
+  about missing `BUILD_FROM`/`BUILD_VERSION`.
+* Finish renaming references from `lxp-bridge` to `eg4-bridge` in
+  `addon/run.sh` and `addon.dev/run.sh`.
 
 
-# 0.9.0 - 2nd November 2022
+# 0.13.0 - 2026-05-11 (first fork release)
 
-* Fix incorrect FAIL MQTT reply on ReadParam commands (#93)
-* Second attempt at ignoring unknown ReadInputs registers (#95)
-* Update HA discovery to use newer "all" MQTT message (#98, @excieve)
-* Exit on receipt of SIGTERM or SIGINT (#99, @kaitlinsm)
-* Add support for replying to inverter heartbeats (#106)
-
-
-# 0.8.0 - 1st September 2022
-
-* Publish MQTT discovery packets with Retain bit set (#86)
-* Be more tolerant of unknown ReadInputs registers (#89)
-* Add missing p_eps and s_eps fields to ReadInput1 (#91)
-* Ignore unhandled WriteParam (tcp_function=196) packets (#92)
-
-
-# 0.7.0 - 26th June 2022
-
-* Add Postgres/MySQL/SQLite support (#44, #45, #47)
-* Use more meaningful labels for HomeAssistant autodiscovery (#55, @chriscn)
-* Allow enabling individual HomeAssistant discovery sensors (#56)
-* Support combined inputs data packet found in newer firmwares (#65, #82)
-* Add internal WriteMulti packet support (not exposed to MQTT yet) (#68)
-* Add scheduled tasks framework; first one is synchronize inverter clock (disabled by default) (#70)
-* Log warning message when configured serial numbers don't match packets we receive from inverter (#78)
-* Fix rare startup crash if inverter is in the middle of sending inputs (#80)
+* Switch TLS stack from native-tls/OpenSSL to rustls (sqlx
+  `runtime-tokio-rustls`, reqwest `rustls` feature). Fixes the
+  arm-cross-compile link error caused by the proc-macro host build
+  picking up ARM OpenSSL libs.
+* Modernize the CI Dockerfile: rust 1.88, Debian bookworm runtime, drop
+  the OpenSSL cross-build step.
+* Modernize GitHub Actions workflows: bump action pins, replace archived
+  `actions-rs/*` with `dtolnay/rust-toolchain@stable`, trigger on `main`
+  with `workflow_dispatch`. Drop the unmaintained darwin-amd64 build.
+* Rename project, addon, binary, and Docker image references from
+  `lxp-bridge`/`jaredmauch/eg4-bridge` to `mechmyday/eg4-bridge`.
+* Re-publish multi-arch Docker images to `mechmyday/eg4-bridge` on
+  Docker Hub.
 
 
-# 0.6.0 - 26th February 2022
+---
 
-* Merge input data packets into one hash when publishing to MQTT and InfluxDB (#36)
-* Fix crash when InfluxDB was disabled (#42)
-* Fix InfluxDB being inadvertently disabled when only MQTT should have been (#42)
-
-
-# 0.5.1 - 2nd November 2021
-
-* No functional changes; fix Windows build by bumping rumqttc crate to 0.10.0
-
-
-# 0.5.0 - 1st November 2021
-
-* Fix "Channel closed" crash when MQTT is disabled (#31)
-* Fix: Send missing MQTT lxp/hold/XX message with new register value on receipt of a WriteSingle packet (#32)
-
-
-# 0.4.0 - 12th October 2021
-
-* Fix enabling/disabling AC Charge ignoring previous register value (#27)
-
-
-# 0.3.0 - 6th September 2021
-
-* Add support for Home Assistant MQTT discovery - power flow sensors only for now (#26)
-
-
-# 0.2.0 - 3rd July 2021
-
-* Add `lxp/cmd/{datalog}/read/inputs/{n}` functionality - read input registers on demand (#16)
-* Add TCP keepalives to inverter connections (#18)
-* Change `time` field of input packets from ISO8601 string to integer unix timestamp for better node-red compatibility (#17)
-* Fix potential hang in inverter packet processing (#16)
-
-
-# 0.1.0 - 24th June 2021
-
-* Initial release
+Earlier history (pre-fork) is preserved in
+[celsworth/lxp-bridge](https://github.com/celsworth/lxp-bridge) and
+[jaredmauch/eg4-bridge](https://github.com/jaredmauch/eg4-bridge).

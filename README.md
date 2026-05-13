@@ -1,76 +1,55 @@
 # eg4-bridge
 [![Release](https://github.com/mechmyday/eg4-bridge/actions/workflows/release.yaml/badge.svg)](https://github.com/mechmyday/eg4-bridge/actions/workflows/release.yaml)
 
-eg4-bridge is a tool for monitoring and controlling EG4 inverters locally. It is based on the work originally done by @Chris Elsworth and @jaredmauch for LuxPower inverters.
+eg4-bridge is a Rust tool that talks to EG4 (and Luxpower-protocol-compatible) inverters on the local network and bridges their data to MQTT, InfluxDB, and SQL databases. It's a fork of [jaredmauch/eg4-bridge](https://github.com/jaredmauch/eg4-bridge), which forked from [celsworth/lxp-bridge](https://github.com/celsworth/lxp-bridge).
 
-It allows you to monitor and possibly control your inverter locally.
+## What you get
 
-## Database Support
+- Local-only monitoring — no dependency on the manufacturer's cloud servers.
+- MQTT publishing of every input/hold register, both raw and decoded.
+- Home Assistant MQTT discovery for ~25 curated sensors out of the box (PV, battery, grid, EPS, temperatures, daily/lifetime energies). Opt-in to expose all 81 documented input registers.
+- Optional InfluxDB v1 sink for time-series storage.
+- Optional PostgreSQL / MySQL / SQLite sinks; schema migrations run automatically.
 
-eg4-bridge supports multiple database backends for storing inverter data:
+## Home Assistant addon
 
-- **PostgreSQL** - Recommended for production use
-- **MySQL** - Alternative production database
-- **SQLite** - Lightweight option for development and testing
+The HA addon is supported and tested on the EG4 18kPV. To install:
 
-Database migrations are automatically applied on startup.
+1. In Home Assistant: **Settings → Add-ons → Add-on Store → ⋮ → Repositories**, add `https://github.com/mechmyday/eg4-bridge`.
+2. Install the **eg4-bridge** addon (or **eg4-bridge (dev)** to track `main`).
+3. Open the addon's **Configuration** tab, fill in the inverter `host`, `serial`, `datalog`, and your MQTT broker details. Set `homeassistant_enabled: true` and `mqtt.homeassistant.enabled: true` to publish discovery messages.
+4. Start the addon. New entities should appear under the eg4-bridge device within one register-read cycle (default 60s).
 
-### PostgreSQL Connection Methods
+The `inputs/all` MQTT payload uses register shortnames (`pv1_voltage`, `battery_voltage`, `soc`, …) sourced from `doc/eg4_registers.json`. Values are published raw; HA's `value_template` applies the per-register scale factor. Set `mqtt.homeassistant.publish_all_registers: true` to expose all 81 input registers as HA sensors instead of the curated essentials.
 
-eg4-bridge supports multiple PostgreSQL connection methods:
+## Standalone (non-HA) usage
 
-#### Localhost Connection
-```yaml
-databases:
-- enabled: true
-  url: postgres://username@localhost/database_name
-  # With password: postgres://username:password@localhost:5432/database_name
+Build from source with Rust 1.88+ (`cargo install --path .`) or pull the multi-arch image from Docker Hub:
+
+```
+docker run --rm -v "$PWD/config.yaml:/etc/config.yaml" mechmyday/eg4-bridge:v0.13.2
 ```
 
-#### Unix Socket Connection
-**Note**: Unix socket connections require URL validation improvements. For now, use localhost connections.
+See `config.yaml.example` for a fully-commented configuration covering MQTT, InfluxDB, databases, the scheduler, and per-inverter knobs.
 
-```yaml
-databases:
-- enabled: true
-  # This format is valid for PostgreSQL but needs URL validation fix:
-  url: postgres://username@/database_name?host=/var/run/postgresql
-  # Custom socket path: postgres://username@/database_name?host=/tmp
-```
+### Database backends
 
-**Workaround**: Use localhost with Unix socket by configuring PostgreSQL to listen on localhost:
-```yaml
-databases:
-- enabled: true
-  url: postgres://username@localhost/database_name
-```
+`databases:` entries accept PostgreSQL, MySQL, or SQLite URLs. PostgreSQL is recommended for production:
 
-#### Trust Authentication (No Password)
-When using trust authentication (common for localhost connections):
 ```yaml
 databases:
 - enabled: true
   url: postgres://user@localhost/eg4_bridge
 ```
 
-See `config.yaml.example` for complete database configuration options.
-
-## Home Assistant add-on (UNMAINTAINED)
-Click the icon below to add this repository to your Home Assistant instance or follow the procedure highlighted on the [Home Assistant website](https://home-assistant.io/hassio/installing_third_party_addons).
-
-I don't use home assistant, but the original implemention by @celsworth included it, so it should be easy to revive.  My main focus is on sending data to influx v1
-
-## Pre-built images (HOME ASSISTANT UNMAINTAINED)
+Trust auth (no password) and TCP-to-localhost are well-tested. Unix socket connections (`postgres://user@/db?host=/var/run/postgresql`) need URL-validation improvements — use TCP for now.
 
 ## Documentation
 
-I am attempting to provide a more stable set of documentation with the EG4 brand devices, which are (were?) compatible with the LuxPower inverters.  It may also work for other inverters.
+- Register definitions and metadata live in [`doc/eg4_registers.json`](doc/eg4_registers.json) — this is the source of truth for shortnames, units, and scales.
+- Modbus reference: [`doc/EG4-18KPV-12LV-Modbus-Protocol.pdf`](doc/EG4-18KPV-12LV-Modbus-Protocol.pdf).
+- Captured wire traces and historical notes are in `doc/*.txt`.
 
-The tests are still from the original version and I expect will be revived, help with maintaining this is welcome.
+## Contributing
 
-## Pull requests
-
-Issues and pull requests are welcome, and co-maintainers will be considered if you send a PR.
-
-It is always helpful if you provide details about what device and configuration you are using.
-
+Issues and pull requests welcome. When reporting bugs, please include inverter model, firmware version, datalog/inverter serial prefix, and a snippet of `loglevel: debug` output around the misbehavior. Co-maintainers will be considered for sustained contributors.

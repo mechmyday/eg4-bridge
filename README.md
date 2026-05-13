@@ -1,7 +1,7 @@
 # eg4-bridge
 [![Release](https://github.com/mechmyday/eg4-bridge/actions/workflows/release.yaml/badge.svg)](https://github.com/mechmyday/eg4-bridge/actions/workflows/release.yaml)
 
-eg4-bridge is a Rust tool that talks to EG4 (and Luxpower-protocol-compatible) inverters on the local network and bridges their data to MQTT, InfluxDB, and SQL databases. It's a fork of [jaredmauch/eg4-bridge](https://github.com/jaredmauch/eg4-bridge), which forked from [celsworth/lxp-bridge](https://github.com/celsworth/lxp-bridge).
+eg4-bridge is a Rust tool that talks to EG4 (and Luxpower-protocol-compatible) inverters on the local network and bridges their data to MQTT, InfluxDB, and SQL databases. It's a fork of [jaredmauch/eg4-bridge](https://github.com/jaredmauch/eg4-bridge), which forked from [celsworth/lxp-bridge](https://github.com/celsworth/lxp-bridge). This is for my personal use (running a EG4 12000KPV), but PRs are welcome 😄.  Please be aware that AI (Claude Code) was used to modify this code.  Use at your own risk.
 
 ## What you get
 
